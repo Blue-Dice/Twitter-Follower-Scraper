@@ -18,13 +18,19 @@ def parser():
 @worker.app.task(name='Twitter Scraper')
 def pusher(user):
     controller = TwitterScraper()
-    if os.path.isfile('cookies.pkl'): controller.quick_login()
-    else: controller.standard_login(config('TWITTER_USER'), config('TWITTER_PASS'))
+    if os.path.isfile('cookies.pkl'):
+        print('Found cookies from a previous session')
+        controller.quick_login()
+    else:
+        print('no')
+        controller.standard_login(config('TWITTER_USER'), config('TWITTER_PASS'))
     controller.scrape_followers(user)
 
 if __name__ == '__main__':
     args = parser()
     user = args.user
     if user:
-        worker.app.worker_main(worker.start_args)
-        pusher.delay(args=([user]))
+        # worker.define_worker_arguments()
+        # worker.app.worker_main(worker.start_args)
+        # pusher.delay(args=([user]))
+        pusher(user)
