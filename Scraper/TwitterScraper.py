@@ -91,17 +91,13 @@ class Scraper():
         time.sleep(3)
         first = True
         last_height = self.driver.execute_script("return document.body.scrollHeight")
-        for _ in range(10):
+        while True:
             if first:
                 self.driver.execute_script('window.scrollTo(0,document.body.scrollHeight/4)')
                 first = False
             else:
                 self.driver.execute_script('window.scrollTo(0,document.body.scrollHeight)')
             time.sleep(3)
-            new_height = self.driver.execute_script("return document.body.scrollHeight")
-            if new_height == last_height:
-                break
-            last_height = new_height
             page_source = self.driver.page_source
             soup = BeautifulSoup(page_source, 'html.parser')
             followers = soup.find_all('div', {"data-testid":"UserCell"})
@@ -120,6 +116,10 @@ class Scraper():
                     print(f'Error while fetching follower information -> {e}')
                     follower_list.append(['ERROR'])
                     continue
-        with open(f'Results/{user}.csv', 'w') as csvfile:
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+        with open(f'ScrapedData/{user}.csv', 'w') as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerows(follower_list)
