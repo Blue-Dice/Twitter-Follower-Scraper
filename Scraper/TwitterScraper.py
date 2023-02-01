@@ -14,7 +14,6 @@ import threading
 import re
 import csv
 import json
-from decouple import config
 import os
 
 class Scraper():
