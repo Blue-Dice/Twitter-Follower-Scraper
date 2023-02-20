@@ -1,11 +1,14 @@
 import multiprocessing
 multiprocessing.freeze_support()
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-import undetected_chromedriver as uc
+from selenium.webdriver import Chrome
+import chromedriver_autoinstaller
 from bs4 import BeautifulSoup
 import threading
 import pickle
@@ -27,18 +30,37 @@ class Scraper():
         os.mkdir(output_path)
     output_path = f'{os.getcwd()}/{output_path}'
     
+    if not os.path.isdir('ChromeDriver'):
+        os.mkdir('ChromeDriver')
+    driver_path = chromedriver_autoinstaller.install(path='ChromeDriver')
+    
     def __init__(self, enable_gui, start_sync) -> None:
-        self.enable_gui = enable_gui
+        self.options = ChromeOptions()
         self.start_sync = start_sync
+        if not enable_gui:
+            self.options.add_argument('--headless')
+            self.options.add_argument('--disable-gpu')
+        self.options.add_argument('--no-sandbox')
+        self.options.add_argument('--mute-audio')
+        self.options.add_argument('--log-level=3')
+        self.options.add_argument('--start-maximized')
+        self.options.add_argument('--disable-web-security')
+        self.options.add_argument('--disable-dev-shm-usage')
+        self.options.add_argument('--disable-blink-features')
+        self.options.add_argument('--disable-blink-features=AutomationControlled')
+        self.options.add_experimental_option('useAutomationExtension', False)
+        self.options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        self.options.add_experimental_option('excludeSwitches', ['enable-automation'])
         self.keywords = [str(key).lower() for key in json.loads(open('search.json','r').read())['keywords']]
         self.driver = self.create_session()
         self.driver.get(self.login_url)
         time.sleep(3)
     
     def create_session(self) -> WebDriver:
-        options = uc.ChromeOptions()
-        options.headless = not self.enable_gui
-        driver = uc.Chrome(options)
+        driver = Chrome(
+            service=ChromeService(self.driver_path),
+            options=self.options
+        )
         return driver
     
     def dispose_session(self) ->None:
