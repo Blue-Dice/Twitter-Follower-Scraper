@@ -1,19 +1,18 @@
 import multiprocessing
 multiprocessing.freeze_support()
-from selenium.webdriver import ChromeOptions
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.ui import WebDriverWait
-import time
-from bs4 import BeautifulSoup
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
-import pickle
+from bs4 import BeautifulSoup
 import threading
-import re
-import csv
+import pickle
 import json
+import time
+import csv
+import re
 import os
 
 class Scraper():
@@ -37,12 +36,9 @@ class Scraper():
         time.sleep(3)
     
     def create_session(self) -> WebDriver:
-        browser_options = ChromeOptions()
-        if not self.enable_gui:
-            browser_options.add_argument('--headless')
-        browser_options.add_argument('--no-sandbox')
-        browser_options.add_argument('--start-maximized')
-        driver = uc.Chrome(options = browser_options)
+        options = uc.ChromeOptions()
+        options.headless = not self.enable_gui
+        driver = uc.Chrome(options)
         return driver
     
     def dispose_session(self) ->None:
